@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Type
 from dataclasses import dataclass
 
 
@@ -23,6 +23,7 @@ class Training:
     """Базовый класс тренировки."""
     LEN_STEP: float = 0.65
     M_IN_KM: int = 1000
+    MIN_H: int = 60
 
     def __init__(self,
                  action: int,
@@ -66,11 +67,10 @@ class Running(Training):
         """Получить количество потраченных калорий за тренировку"""
         coeff_calorie_1: int = 18
         coeff_calorie_2: int = 20
-        MIN_H: int = 60
         get_spent_calories: float = ((coeff_calorie_1 * self.get_mean_speed()
                                      - coeff_calorie_2)
                                      * self.weight / self.M_IN_KM
-                                     * MIN_H * self.duration)
+                                     * self.MIN_H * self.duration)
         return get_spent_calories
 
 
@@ -89,13 +89,12 @@ class SportsWalking(Training):
         """Получить количество потраченных калорий за тренировку"""
         coeff_calorie_1: float = 0.035
         coeff_calorie_2: float = 0.029
-        MIN_H: int = 60
 
         get_spent_calories: float = ((coeff_calorie_1 * self.weight
                                      + (self.get_mean_speed()
                                         ** 2 // self.height)
                                      * coeff_calorie_2 * self.weight)
-                                     * MIN_H * self.duration)
+                                     * self.MIN_H * self.duration)
         return get_spent_calories
 
 
@@ -131,9 +130,9 @@ class Swimming(Training):
 
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
-    t_training: Dict[str, Tuple[float, ...]] = {"SWM": Swimming,
-                                                "RUN": Running,
-                                                "WLK": SportsWalking}
+    t_training: Dict[str, Type[Training]] = {"SWM": Swimming,
+                                             "RUN": Running,
+                                             "WLK": SportsWalking}
     type_training = t_training.get(workout_type, None)
     if type_training is None:
         raise ValueError(f"Неизвестная тренировка {workout_type}.")
@@ -154,9 +153,10 @@ if __name__ == '__main__':
         ('WLK', [9000, 1, 75, 180]),
     ]
 
-    try:
-        for workout_type, data in packages:
+    for workout_type, data in packages:
+        try:
             training = read_package(workout_type, data)
+        except ValueError:
+            print(f"Неизвестная тренировка {workout_type}.")
+        else:
             main(training)
-    except ValueError:
-        print(f"Неизвестная тренировка {workout_type}.")
