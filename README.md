@@ -10,10 +10,12 @@
 
 git clone git@github.com:RustamM2022/hw_python_oop.git
 cd hw_python_oop
+
 Cоздать и активировать виртуальное окружение:
 
 python -m venv env
 source venv/Scripts/activate
+
 Установить зависимости из файла requirements.txt:
 
 python -m pip install --upgrade pip
